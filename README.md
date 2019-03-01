@@ -1,4 +1,4 @@
-# Google Bigtable AddIn for Microsoft Excel
+# Google Cloud Bigtable AddIn for Microsoft Excel
 This Project is basically build to read/write data to Google Cloud Bigtable Using Microsoft Excel.
 
 # Getting Started
