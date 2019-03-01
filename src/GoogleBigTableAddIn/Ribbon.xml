@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<customUI onLoad="Ribbon_Load" xmlns="http://schemas.microsoft.com/office/2006/01/customui">
+    <ribbon>
+        <tabs>
+            <tab id="CBTTab" label="Google CBT">
+                <group id="grp1" label="Big Table">
+                    <button id="btnSayHelloWorld" onAction="btnSayHelloWorld_Click" label="Test AddIn" showImage="false" />
+                </group>
+                <group id="grp2" label="Project Details">
+                    <editBox id="eb_ProjectId" label="  Project ID" showImage="false" />
+                    <editBox id="eb_instanceId" label="InstanceID" showImage="false" />
+                    <editBox id="eb_crePath" label="Credential Path" showImage="false" />
+                </group>
+                <group id="group1" label="Table Details">
+                    <editBox id="eb_tableName" label="  Table Name " showImage="false" />
+                    <editBox id="eb_columnFamily" label="Column Family" showImage="false" />
+                </group>
+                <group id="group2" label="Table Methods">
+                    <button id="btnAdd" onAction="btnAdd_Click" label="Add Table" showImage="false" />
+                    <button id="btnDelete" onAction="btnDelete_Click" label="Delete Table" showImage="false" />
+                    <button id="btnCheck" onAction="btnCheck_Click" label="Check Table" showImage="false" />
+                </group>
+            </tab>
+        </tabs>
+    </ribbon>
+</customUI>
