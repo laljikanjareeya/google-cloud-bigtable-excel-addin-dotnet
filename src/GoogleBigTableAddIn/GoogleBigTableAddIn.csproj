@@ -292,7 +292,6 @@
     </Compile>
     <None Include="app.config" />
     <None Include="Documents\CBT_Demo.xlsm" />
-    <None Include="GoogleBigTableAddIn_TemporaryKey.pfx" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
