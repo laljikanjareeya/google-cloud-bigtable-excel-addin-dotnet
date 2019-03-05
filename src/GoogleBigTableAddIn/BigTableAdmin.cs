@@ -7,32 +7,43 @@ using Grpc.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 
 namespace GoogleBigTableAddIn
 {
-    public static class BigTableAdmin
+    public class BigTableAdmin
     {
-        public static string SayHelloWorld()
+        private string ProjectId { get; set; }
+        private string InstanceId { get; set; }
+        private string TableName { get; set; }
+        private string ColumnFamily { get; set; }
+        private string CredentialPath { get; set; }
+
+        public BigTableAdmin(string projectId, string instanceId, string tableName, string columnFamily, string credentialPath)
+        {
+            ProjectId = projectId;
+            InstanceId = instanceId;
+            TableName = tableName;
+            ColumnFamily = columnFamily;
+            CredentialPath = credentialPath;
+
+        }
+        public string SayHelloWorld()
         {
             return "Big Table Add-In Ribbon Tested OK!";
         }
 
-        private static bool CheckProperty(string projectId, string instanceId, string tableName)
+        private bool CheckProperty(bool isCreationTable = false)
         {
-            return !string.IsNullOrWhiteSpace(projectId) && !string.IsNullOrWhiteSpace(instanceId) && !string.IsNullOrWhiteSpace(tableName);
+            return isCreationTable ? !string.IsNullOrWhiteSpace(ProjectId) && !string.IsNullOrWhiteSpace(InstanceId) &&
+                !string.IsNullOrWhiteSpace(TableName) && !string.IsNullOrWhiteSpace(ColumnFamily) :
+                !string.IsNullOrWhiteSpace(ProjectId) && !string.IsNullOrWhiteSpace(InstanceId) &&
+                !string.IsNullOrWhiteSpace(TableName);
         }
 
-        private static bool CheckProperty(string projectId, string instanceId, string tableName, string columnFamily)
+        public bool CheckExistanceTable()
         {
-            return CheckProperty(projectId, instanceId, tableName) && !string.IsNullOrWhiteSpace(columnFamily);
-        }
-
-        public static bool CheckExistanceTable(string projectId, string instanceId, string tableName, string credentialPath)
-        {
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialPath);
-            if (!CheckProperty(projectId, instanceId, tableName))
+            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", CredentialPath);
+            if (!CheckProperty())
             {
                 throw new Exception("One Or More Properties Not Set");
             }
@@ -40,10 +51,10 @@ namespace GoogleBigTableAddIn
             try
             {
                 BigtableTableAdminClient bigtableTableAdminClient = BigtableTableAdminClient.Create();
-                InstanceName instanceName = new InstanceName(projectId, instanceId);
+                InstanceName instanceName = new InstanceName(ProjectId, InstanceId);
                 var tables = bigtableTableAdminClient.ListTables(instanceName).ToList();
-                var abc = tables.FirstOrDefault(x => x.TableName.TableId == tableName);
-                exists = tables.Any(x => x.TableName.TableId == tableName);
+                var abc = tables.FirstOrDefault(x => x.TableName.TableId == TableName);
+                exists = tables.Any(x => x.TableName.TableId == TableName);
             }
             catch (Exception ex)
             {
@@ -52,16 +63,16 @@ namespace GoogleBigTableAddIn
             return exists;
         }
 
-        public static bool CreateTable(string projectId, string instanceId, string tableName, string columnFamily, string credentialPath)
+        public bool CreateTable()
         {
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialPath);
+            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", CredentialPath);
 
-            if (!CheckProperty(projectId, instanceId, tableName, columnFamily))
+            if (!CheckProperty(true))
             {
                 throw new Exception("One Or More Properties Not Set");
             }
 
-            if (CheckExistanceTable(projectId, instanceId, tableName, credentialPath))
+            if (CheckExistanceTable())
             {
                 throw new Exception("Table Already Exists");
             }
@@ -72,14 +83,14 @@ namespace GoogleBigTableAddIn
                 var callSetting = CreateRetryCallSettings(3);
                 var bigtableTableAdminClient = BigtableTableAdminClient.Create();
                 bigtableTableAdminClient.CreateTable(
-                     new InstanceName(projectId, instanceId),
-                     tableName, new Table
+                     new InstanceName(ProjectId, InstanceId),
+                     TableName, new Table
                      {
                          Granularity = Table.Types.TimestampGranularity.Millis,
                          ColumnFamilies =
                          {
                                     {
-                                        columnFamily, new ColumnFamily
+                                        ColumnFamily, new ColumnFamily
                                         {
                                             GcRule = new GcRule
                                             {
@@ -107,7 +118,7 @@ namespace GoogleBigTableAddIn
             return Created;
         }
 
-        static CallSettings CreateRetryCallSettings(int tryCount)
+        private CallSettings CreateRetryCallSettings(int tryCount)
         {
             var backoff = new BackoffSettings(TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(5000), 2);
             return CallSettings.FromCallTiming(CallTiming.FromRetry(new RetrySettings(backoff, backoff, Expiration.None,
@@ -115,24 +126,24 @@ namespace GoogleBigTableAddIn
                 RetrySettings.NoJitter)));
         }
 
-        public static void AddTestDataToTable(string projectId, string instanceId, string tableName, string columnFamily, string credentialPath)
+        public void AddTestDataToTable()
         {
             try
             {
-                if (!CheckExistanceTable(projectId, instanceId, tableName, credentialPath))
+                if (!CheckExistanceTable())
                 {
                     throw new Exception("No Such Table Found");
                 }
                 var bigtableClient = BigtableClient.Create();
                 List<Mutation> Cols = new List<Mutation>();
-                TableName _table = new TableName(projectId, instanceId, tableName);
+                TableName _table = new TableName(ProjectId, InstanceId, TableName);
 
                 var request = new MutateRowsRequest
                 {
                     TableNameAsTableName = _table,
                 };
                 request.Entries.Add(Mutations.CreateEntry(Guid.NewGuid().ToString(),
-                   Mutations.SetCell(columnFamily, "TestColumnName", "Test Column Value")));
+                   Mutations.SetCell(ColumnFamily, "TestColumnName", "Test Column Value")));
                 bigtableClient.MutateRows(request);
             }
             catch (RpcException ex)
@@ -145,10 +156,10 @@ namespace GoogleBigTableAddIn
             }
         }
 
-        public static bool DeleteTable(string projectId, string instanceId, string tableName, string credentialPath)
+        public bool DeleteTable()
         {
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialPath);
-            if (!CheckProperty(projectId, instanceId, tableName))
+            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", CredentialPath);
+            if (!CheckProperty())
             {
                 throw new Exception("One Or More Properties Not Set");
             }
@@ -157,7 +168,7 @@ namespace GoogleBigTableAddIn
             {
                 BigtableTableAdminClient bigtableTableAdminClient = BigtableTableAdminClient.Create();
                 bigtableTableAdminClient.DeleteTable(
-                                new TableName(projectId, instanceId, tableName));
+                                new TableName(ProjectId, InstanceId, TableName));
                 Deleted = true;
             }
             catch (Exception ex)
@@ -167,9 +178,9 @@ namespace GoogleBigTableAddIn
             return Deleted;
         }
 
-        public static Dictionary<string, List<string>> GetAllRecords(string projectId, string instanceId, string tableName, string credentialPath)
+        public Dictionary<string, List<string>> GetAllRecords()
         {
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", credentialPath);
+            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", CredentialPath);
             var bigtableClient = BigtableClient.Create();
 
             var recordList = new Dictionary<string, List<string>>();
@@ -177,7 +188,7 @@ namespace GoogleBigTableAddIn
 
             try
             {
-                TableName tableNameClient = new TableName(projectId, instanceId, tableName);
+                TableName tableNameClient = new TableName(ProjectId, InstanceId, TableName);
                 ReadRowsStream responseRead;
                 responseRead = bigtableClient.ReadRows(tableNameClient);
                 var response = responseRead.ToList().Result;

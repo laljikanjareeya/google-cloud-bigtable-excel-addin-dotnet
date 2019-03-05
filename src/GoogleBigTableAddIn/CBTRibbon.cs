@@ -16,7 +16,7 @@ namespace GoogleBigTableAddIn
         {
             Worksheet worksheet = Globals.ThisAddIn.Application.ActiveSheet;
             worksheet.UsedRange.ClearContents();
-            worksheet.Range["A1"].Value = BigTableAdmin.SayHelloWorld();
+            worksheet.Range["A1"].Value = GetBigTableAdminObject().SayHelloWorld();
             worksheet.Columns.AutoFit();
         }
 
@@ -31,7 +31,7 @@ namespace GoogleBigTableAddIn
             bool Created = false;
             try
             {
-                Created = BigTableAdmin.CreateTable(eb_ProjectId.Text, eb_instanceId.Text, eb_tableName.Text, eb_columnFamily.Text, eb_crePath.Text);
+                Created = GetBigTableAdminObject().CreateTable();
                 if (Created)
                     worksheet.Cells[1, 1] = "Table Created Successfully, Please Click on Insert Test Data to insert Data into Table.";
                 else
@@ -60,7 +60,7 @@ namespace GoogleBigTableAddIn
             bool Deleted = false;
             try
             {
-                Deleted = BigTableAdmin.DeleteTable(eb_ProjectId.Text, eb_instanceId.Text, eb_tableName.Text, eb_crePath.Text);
+                Deleted = GetBigTableAdminObject().DeleteTable();
                 if (Deleted)
                     worksheet.Cells[1, 1] = "Table Deleted Successfully";
                 else
@@ -87,7 +87,7 @@ namespace GoogleBigTableAddIn
             bool Exists = false;
             try
             {
-                Exists = BigTableAdmin.CheckExistanceTable(eb_ProjectId.Text, eb_instanceId.Text, eb_tableName.Text, eb_crePath.Text);
+                Exists = GetBigTableAdminObject().CheckExistanceTable();
                 if (Exists)
                     worksheet.Cells[1, 1] = "Table Exists";
                 else
@@ -113,7 +113,7 @@ namespace GoogleBigTableAddIn
             {
                 var row = 1;
                 var column = 1;
-                var data = BigTableAdmin.GetAllRecords(eb_ProjectId.Text, eb_instanceId.Text, eb_tableName.Text, eb_crePath.Text);
+                var data = GetBigTableAdminObject().GetAllRecords();
                 if (data.ContainsKey("ErrorCode"))
                 {
                     worksheet.Cells[1, 1] = data["ErrorCode"].FirstOrDefault();
@@ -181,7 +181,7 @@ namespace GoogleBigTableAddIn
             worksheet.UsedRange.ClearContents();
             try
             {
-                BigTableAdmin.AddTestDataToTable(eb_ProjectId.Text, eb_instanceId.Text, eb_tableName.Text, eb_columnFamily.Text, eb_crePath.Text);
+                GetBigTableAdminObject().AddTestDataToTable();
                 worksheet.Cells[1, 1] = "Test Data Inserted Successfully, Please Click on Display Table Data to Show Table Data.";
 
             }
@@ -189,6 +189,11 @@ namespace GoogleBigTableAddIn
             {
                 worksheet.Cells[1, 1] = ex.InnerException == null ? ex.Message : ex.InnerException.Message;
             }
+        }
+
+        private BigTableAdmin GetBigTableAdminObject()
+        {
+            return new BigTableAdmin(eb_ProjectId.Text, eb_instanceId.Text, eb_tableName.Text, eb_columnFamily.Text, eb_crePath.Text);
         }
     }
 }
