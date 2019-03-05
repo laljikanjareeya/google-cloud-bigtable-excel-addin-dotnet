@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace GoogleBigTableAddIn
 {
-    public class BigTableAdmin
+    public class BigTableAdminClientUtility
     {
         private string ProjectId { get; set; }
         private string InstanceId { get; set; }
@@ -18,7 +18,7 @@ namespace GoogleBigTableAddIn
         private string ColumnFamily { get; set; }
         private string CredentialPath { get; set; }
 
-        public BigTableAdmin(string projectId, string instanceId, string tableName, string columnFamily, string credentialPath)
+        public BigTableAdminClientUtility(string projectId, string instanceId, string tableName, string columnFamily, string credentialPath)
         {
             ProjectId = projectId;
             InstanceId = instanceId;
@@ -27,22 +27,23 @@ namespace GoogleBigTableAddIn
             CredentialPath = credentialPath;
 
         }
+
+        /// <summary>
+        /// Test The Bigtable Ribbon
+        /// </summary>
+        /// <returns></returns>
         public string SayHelloWorld()
         {
             return "Big Table Add-In Ribbon Tested OK!";
         }
 
-        private bool CheckProperty(bool isCreationTable = false)
-        {
-            return isCreationTable ? !string.IsNullOrWhiteSpace(ProjectId) && !string.IsNullOrWhiteSpace(InstanceId) &&
-                !string.IsNullOrWhiteSpace(TableName) && !string.IsNullOrWhiteSpace(ColumnFamily) :
-                !string.IsNullOrWhiteSpace(ProjectId) && !string.IsNullOrWhiteSpace(InstanceId) &&
-                !string.IsNullOrWhiteSpace(TableName);
-        }
-
+        /// <summary>
+        /// Check The Given Table is exist or not in Google Cloud Bigtable
+        /// </summary>
+        /// <returns></returns>
         public bool CheckExistanceTable()
         {
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", CredentialPath);
+            SetEnvironmentVariable();
             if (!CheckProperty())
             {
                 throw new Exception("One Or More Properties Not Set");
@@ -52,8 +53,7 @@ namespace GoogleBigTableAddIn
             {
                 BigtableTableAdminClient bigtableTableAdminClient = BigtableTableAdminClient.Create();
                 InstanceName instanceName = new InstanceName(ProjectId, InstanceId);
-                var tables = bigtableTableAdminClient.ListTables(instanceName).ToList();
-                var abc = tables.FirstOrDefault(x => x.TableName.TableId == TableName);
+                var tables = bigtableTableAdminClient.ListTables(instanceName);
                 exists = tables.Any(x => x.TableName.TableId == TableName);
             }
             catch (Exception ex)
@@ -63,9 +63,13 @@ namespace GoogleBigTableAddIn
             return exists;
         }
 
+        /// <summary>
+        /// Create Table in Google Cloud Bigtable
+        /// </summary>
+        /// <returns></returns>
         public bool CreateTable()
         {
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", CredentialPath);
+            SetEnvironmentVariable();
 
             if (!CheckProperty(true))
             {
@@ -118,14 +122,9 @@ namespace GoogleBigTableAddIn
             return Created;
         }
 
-        private CallSettings CreateRetryCallSettings(int tryCount)
-        {
-            var backoff = new BackoffSettings(TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(5000), 2);
-            return CallSettings.FromCallTiming(CallTiming.FromRetry(new RetrySettings(backoff, backoff, Expiration.None,
-                (RpcException e) => e.Status.StatusCode != StatusCode.AlreadyExists && --tryCount > 0,
-                RetrySettings.NoJitter)));
-        }
-
+        /// <summary>
+        /// Add Test Data into Given Google Cloud Bigtable
+        /// </summary>
         public void AddTestDataToTable()
         {
             try
@@ -156,9 +155,13 @@ namespace GoogleBigTableAddIn
             }
         }
 
+        /// <summary>
+        /// Delete Table From Google Cloud Bigtable
+        /// </summary>
+        /// <returns></returns>
         public bool DeleteTable()
         {
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", CredentialPath);
+            SetEnvironmentVariable();
             if (!CheckProperty())
             {
                 throw new Exception("One Or More Properties Not Set");
@@ -178,9 +181,13 @@ namespace GoogleBigTableAddIn
             return Deleted;
         }
 
+        /// <summary>
+        /// Get All Records from Given Table
+        /// </summary>
+        /// <returns></returns>
         public Dictionary<string, List<string>> GetAllRecords()
         {
-            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", CredentialPath);
+            SetEnvironmentVariable();
             var bigtableClient = BigtableClient.Create();
 
             var recordList = new Dictionary<string, List<string>>();
@@ -241,5 +248,41 @@ namespace GoogleBigTableAddIn
                 return recordList;
             }
         }
+
+        #region Private Methods
+        /// <summary>
+        /// Check for Property is set in Excel Ribbon
+        /// </summary>
+        /// <param name="isCreationTable"></param>
+        /// <returns></returns>
+        private bool CheckProperty(bool isCreationTable = false)
+        {
+            return isCreationTable ? !string.IsNullOrWhiteSpace(ProjectId) && !string.IsNullOrWhiteSpace(InstanceId) &&
+                !string.IsNullOrWhiteSpace(TableName) && !string.IsNullOrWhiteSpace(ColumnFamily) :
+                !string.IsNullOrWhiteSpace(ProjectId) && !string.IsNullOrWhiteSpace(InstanceId) &&
+                !string.IsNullOrWhiteSpace(TableName);
+        }
+
+        /// <summary>
+        /// Retry Call Setting for Create Table
+        /// </summary>
+        /// <param name="tryCount"></param>
+        /// <returns></returns>
+        private CallSettings CreateRetryCallSettings(int tryCount)
+        {
+            var backoff = new BackoffSettings(TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(5000), 2);
+            return CallSettings.FromCallTiming(CallTiming.FromRetry(new RetrySettings(backoff, backoff, Expiration.None,
+                (RpcException e) => e.Status.StatusCode != StatusCode.AlreadyExists && --tryCount > 0,
+                RetrySettings.NoJitter)));
+        }
+
+        /// <summary>
+        /// Set authentication credentials Path
+        /// </summary>
+        private void SetEnvironmentVariable()
+        {
+            Environment.SetEnvironmentVariable("GOOGLE_APPLICATION_CREDENTIALS", CredentialPath);
+        }
+        #endregion
     }
 }

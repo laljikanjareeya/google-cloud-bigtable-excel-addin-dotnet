@@ -35,7 +35,7 @@
     <PublishUrl>C:\publish\</PublishUrl>
     <InstallUrl />
     <TargetCulture>en</TargetCulture>
-    <ApplicationVersion>1.0.0.5</ApplicationVersion>
+    <ApplicationVersion>1.0.0.6</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
@@ -264,15 +264,13 @@
     can be found.
   -->
   <ItemGroup>
-    <Compile Include="BigTableAdmin.cs" />
-    <Compile Include="BigTableUtility.cs" />
+    <Compile Include="BigTableAdminClientUtility.cs" />
     <Compile Include="CBTRibbon.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="CBTRibbon.Designer.cs">
       <DependentUpon>CBTRibbon.cs</DependentUpon>
     </Compile>
-    <Compile Include="IBigTableUtility.cs" />
     <Compile Include="KeyValueViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

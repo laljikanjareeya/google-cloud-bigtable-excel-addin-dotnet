@@ -9,14 +9,6 @@
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
         {
         }
-        private BigTableUtilityCOM utilities;
-        protected override object RequestComAddInAutomationService()
-        {
-            if (utilities == null)
-                utilities = new BigTableUtilityCOM();
-
-            return utilities;
-        }
 
         #region VSTO generated code
 
