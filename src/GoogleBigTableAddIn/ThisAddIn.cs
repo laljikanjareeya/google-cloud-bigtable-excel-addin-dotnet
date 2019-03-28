@@ -10,6 +10,15 @@
         {
         }
 
+        private BigTableAdminClientCOM utilities;
+        protected override object RequestComAddInAutomationService()
+        {
+            if (utilities == null)
+                utilities = new BigTableAdminClientCOM();
+
+            return utilities;
+        }
+
         #region VSTO generated code
 
         /// <summary>
