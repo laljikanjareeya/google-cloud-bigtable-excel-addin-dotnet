@@ -16,7 +16,7 @@ namespace GoogleBigTableAddIn
         {
             Worksheet worksheet = Globals.ThisAddIn.Application.ActiveSheet;
             worksheet.UsedRange.ClearContents();
-            worksheet.Range["A1"].Value = BigTableAdminClientUtilityInstance().SayHelloWorld();
+            worksheet.Range["A1"].Value = BigTableAdminClientUtilityInstance().TestBigtableAddIn();
             worksheet.Columns.AutoFit();
         }
 
@@ -87,7 +87,7 @@ namespace GoogleBigTableAddIn
             bool Exists = false;
             try
             {
-                Exists = BigTableAdminClientUtilityInstance().CheckExistanceTable();
+                Exists = BigTableAdminClientUtilityInstance().IsTableExists();
                 if (Exists)
                     worksheet.Cells[1, 1] = "Table Exists";
                 else
@@ -181,7 +181,7 @@ namespace GoogleBigTableAddIn
             worksheet.UsedRange.ClearContents();
             try
             {
-                BigTableAdminClientUtilityInstance().AddTestDataToTable();
+                BigTableAdminClientUtilityInstance().InsertTestDataToTable();
                 worksheet.Cells[1, 1] = "Test Data Inserted Successfully, Please Click on Display Table Data to Show Table Data.";
 
             }

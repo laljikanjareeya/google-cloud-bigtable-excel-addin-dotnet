@@ -37,7 +37,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CBTRibbon));
             this.CBTTab = this.Factory.CreateRibbonTab();
             this.grp1 = this.Factory.CreateRibbonGroup();
-            this.btnSayHelloWorld = this.Factory.CreateRibbonButton();
+            this.btnTestAddIn = this.Factory.CreateRibbonButton();
             this.grp2 = this.Factory.CreateRibbonGroup();
             this.eb_ProjectId = this.Factory.CreateRibbonEditBox();
             this.eb_instanceId = this.Factory.CreateRibbonEditBox();
@@ -69,18 +69,18 @@
             // 
             // grp1
             // 
-            this.grp1.Items.Add(this.btnSayHelloWorld);
+            this.grp1.Items.Add(this.btnTestAddIn);
             this.grp1.Label = "Big Table";
             this.grp1.Name = "grp1";
             // 
-            // btnSayHelloWorld
+            // btnTestAddIn
             // 
-            this.btnSayHelloWorld.Image = global::GoogleBigTableAddIn.Properties.Resources.test_addin;
-            this.btnSayHelloWorld.Label = "Test AddIn";
-            this.btnSayHelloWorld.Name = "btnSayHelloWorld";
-            this.btnSayHelloWorld.ScreenTip = "Test this AddIn is working fine or not.";
-            this.btnSayHelloWorld.ShowImage = true;
-            this.btnSayHelloWorld.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnSayHelloWorld_Click);
+            this.btnTestAddIn.Image = global::GoogleBigTableAddIn.Properties.Resources.test_addin;
+            this.btnTestAddIn.Label = "Test AddIn";
+            this.btnTestAddIn.Name = "btnTestAddIn";
+            this.btnTestAddIn.ScreenTip = "Test this AddIn is working fine or not.";
+            this.btnTestAddIn.ShowImage = true;
+            this.btnTestAddIn.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnSayHelloWorld_Click);
             // 
             // grp2
             // 
@@ -216,7 +216,7 @@
 
         internal Microsoft.Office.Tools.Ribbon.RibbonTab CBTTab;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup grp1;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnSayHelloWorld;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnTestAddIn;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnAdd;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup grp2;
         internal Microsoft.Office.Tools.Ribbon.RibbonEditBox eb_ProjectId;

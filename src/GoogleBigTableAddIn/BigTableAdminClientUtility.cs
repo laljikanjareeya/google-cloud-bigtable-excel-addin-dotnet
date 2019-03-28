@@ -32,7 +32,7 @@ namespace GoogleBigTableAddIn
         /// Test The Bigtable Ribbon
         /// </summary>
         /// <returns></returns>
-        public string SayHelloWorld()
+        public string TestBigtableAddIn()
         {
             return "Big Table Add-In Ribbon Tested OK!";
         }
@@ -41,7 +41,7 @@ namespace GoogleBigTableAddIn
         /// Check The Given Table is exist or not in Google Cloud Bigtable
         /// </summary>
         /// <returns></returns>
-        public bool CheckExistanceTable()
+        public bool IsTableExists()
         {
             SetEnvironmentVariable();
             if (!CheckProperty())
@@ -76,7 +76,7 @@ namespace GoogleBigTableAddIn
                 throw new Exception("One Or More Properties Not Set");
             }
 
-            if (CheckExistanceTable())
+            if (IsTableExists())
             {
                 throw new Exception("Table Already Exists");
             }
@@ -84,8 +84,8 @@ namespace GoogleBigTableAddIn
             bool Created = false;
             try
             {
-                var callSetting = CreateRetryCallSettings(3);
-                var bigtableTableAdminClient = BigtableTableAdminClient.Create();
+                var callSetting = CreateRetryCallSettings();
+                var bigtableTableAdminClient = BigtableTableAdminClient.Create(settings: callSetting);
                 bigtableTableAdminClient.CreateTable(
                      new InstanceName(ProjectId, InstanceId),
                      TableName, new Table
@@ -103,7 +103,7 @@ namespace GoogleBigTableAddIn
                                         }
                                     }
                          }
-                     }, callSetting);
+                     });
                 Created = true;
             }
             catch (RpcException ex)
@@ -125,11 +125,11 @@ namespace GoogleBigTableAddIn
         /// <summary>
         /// Add Test Data into Given Google Cloud Bigtable
         /// </summary>
-        public void AddTestDataToTable()
+        public void InsertTestDataToTable()
         {
             try
             {
-                if (!CheckExistanceTable())
+                if (!IsTableExists())
                 {
                     throw new Exception("No Such Table Found");
                 }
@@ -268,12 +268,12 @@ namespace GoogleBigTableAddIn
         /// </summary>
         /// <param name="tryCount"></param>
         /// <returns></returns>
-        private CallSettings CreateRetryCallSettings(int tryCount)
+        private BigtableTableAdminSettings CreateRetryCallSettings()
         {
-            var backoff = new BackoffSettings(TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(5000), 2);
-            return CallSettings.FromCallTiming(CallTiming.FromRetry(new RetrySettings(backoff, backoff, Expiration.None,
-                (RpcException e) => e.Status.StatusCode != StatusCode.AlreadyExists && --tryCount > 0,
-                RetrySettings.NoJitter)));
+            var clientSettings = BigtableTableAdminSettings.GetDefault();
+            var longTimeout = CallTiming.FromTimeout(TimeSpan.FromMinutes(2));
+            clientSettings.CreateTableSettings = clientSettings.CreateTableSettings.WithCallTiming(longTimeout);
+            return clientSettings;
         }
 
         /// <summary>
